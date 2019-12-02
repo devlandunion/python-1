@@ -17,15 +17,18 @@ def getHtml(url):
 
 
 def getImgLinks(url):
-    html = getHtml(url)
-    bsObject = BeautifulSoup(html, "lxml")
-    imgContainer = bsObject.find('div', {'id':'carousel-thumbnails'})
-    imgLinks = []
+    try:
+        html = getHtml(url)
+        bsObject = BeautifulSoup(html, "lxml")
+        imgContainer = bsObject.find('div', {'id':'carousel-thumbnails'})
+        imgLinks = []
 
-    if(imgContainer != None):
-        for imgTag in imgContainer.find('div', {'role':'listbox'}).select('img'):
-            imgLink = imgTag.get('src').replace('160/90', '780/437')
-            imgLinks.append(imgLink)
+        if(imgContainer != None):
+            for imgTag in imgContainer.find('div', {'role':'listbox'}).select('img'):
+                imgLink = imgTag.get('src').replace('160/90', '780/437')
+                imgLinks.append(imgLink)
+    except:
+        imgLinks = []
     
     return imgLinks
 
@@ -34,12 +37,18 @@ def downloadImages(directory, url):
     imgLinks = getImgLinks(url)
 
     if(len(imgLinks)):
+        status = True
         for index, link in enumerate(imgLinks):
-            opener = urllib.request.build_opener()
-            opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-            urllib.request.install_opener(opener)
-            urllib.request.urlretrieve(link, directory + '/' + str(index) + '.jpg')
-        return True
+            try:
+                opener = urllib.request.build_opener()
+                opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+                urllib.request.install_opener(opener)
+                urllib.request.urlretrieve(link, directory + '/' + str(index) + '.jpg')
+                status = True
+            except:
+                status = False
+
+        return status
     else:
         return False
 
@@ -74,7 +83,7 @@ def getAddr(bsObject):
 
     return addr
 
-def grabDetails(city, url):
+def grabDetails(state, city, url):
     html = getHtml(url)
     bsObject = BeautifulSoup(html, 'lxml')
 
@@ -84,16 +93,31 @@ def grabDetails(city, url):
     details['city'] = city
     details['ref_url'] = url
     details['name'] = bsObject.find('h1', {'class':'title-xxxl'}).text.strip()
-    details['overview'] = bsObject.find('h2', text='Overview').find_next_sibling('p').text.strip()
+    try:
+        details['overview'] = bsObject.find('h2', text='Overview').find_next_sibling('p').text.strip()
+    except:
+        details['overview'] = None
     details['address'] = getAddr(bsObject)
-    details['phone'] = find_nextSibling(bsObject, 'Phone:', 'b')
-    details['fax'] = find_nextSibling(bsObject, 'Fax:', 'b')
-    details['toll_free'] = find_nextSibling(bsObject, 'Toll Free:', 'b')
+    try:
+        details['phone'] = find_nextSibling(bsObject, 'Phone:', 'b')
+    except:
+        details['phone'] = None
+    try:
+        details['fax'] = find_nextSibling(bsObject, 'Fax:', 'b')
+    except:
+        details['fax'] = None
+    try:
+        details['toll_free'] = find_nextSibling(bsObject, 'Toll Free:', 'b')
+    except:
+        details['toll_free'] = None
 
-    directory = './images/' + details['city'] + '/' + details['name']
-    if not os.path.exists(directory):
-        os.makedirs(directory)
-    downloadImages(directory, url)
+    try:
+        directory = './images/' + state + '/' + details['city'].replace("/", "-") + '/' + details['name'].replace("/", "-")
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        downloadImages(directory, url)
+    except:
+        print('Image not found')
 
     try:
         details['hotel_website'] = bsObject.find('a', {'title':'Hotel Website'}).get('href')
@@ -250,7 +274,7 @@ def main(name):
 
     result = []
     for i in range(0, len(urls)):
-        result.append(grabDetails(urls.City[i], urls.Link[i]))
+        result.append(grabDetails(name, urls.City[i], urls.Link[i]))
 
     directory = './results/' + name
     if not os.path.exists(directory):
@@ -261,4 +285,4 @@ def main(name):
 
 
 if __name__ == '__main__':
-    main('test')
+    main('Alabama')
