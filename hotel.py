@@ -274,7 +274,12 @@ def main(name):
 
     result = []
     for i in range(0, len(urls)):
-        result.append(grabDetails(name, urls.City[i], urls.Link[i]))
+        try:
+            result.append(grabDetails(name, urls.City[i], urls.Link[i]))
+        except:
+            text = open('error.log', 'a')
+            text.write(urls.City[i], urls.Link[i])
+            text.write('\n')
 
     directory = './results/' + name
     if not os.path.exists(directory):
