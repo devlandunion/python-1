@@ -50,6 +50,52 @@ def get_cities_url(stateUrls):
     return cityUrls
 
 
+def get_washington_dc():
+    hotelUrls = []
+    name = 'Washington, DC'
+    with open('results/' + name + '.csv', 'w', newline='') as f:
+        writer = csv.writer(f, delimiter =',')
+        writer.writerow(('City', 'Link'))
+
+        link = 'https://www.travelweekly.com/Hotels/Washington-DC'
+        city_url = { 'state': 'Washington, DC', 'city': 'Washington, DC', 'link': link }
+        file_name = 'results/' + city_url['state'] + '.csv'
+
+    try:
+        html = get_html(city_url['link'])
+        bsObject = BeautifulSoup(html, "lxml")
+
+        info_str = []
+        info_str = bsObject.find('div', {'class':'results'}).text.strip().lower().split(" ")
+
+        if(len(info_str) == 1):
+            number_of_pages = 0
+        else:
+            info_str.reverse()
+            number_of_hotels = int(info_str[1])
+
+            if(number_of_hotels < 15):
+                number_of_hotels = 10
+
+            number_of_pages = math.ceil(number_of_hotels/10)
+            
+        for index in range(0, number_of_pages):
+            pageUrl = city_url['link'] + '?pg=' + str(index + 1)
+            req = urllib.request.Request(pageUrl, headers={'User-Agent': 'Mozilla/5.0'})
+            html = urllib.request.urlopen(req)
+            bsObject = BeautifulSoup(html, "lxml")
+
+            for index, resultDiv in enumerate(bsObject.select('div.result')):
+                link = baseUrl + resultDiv.find('a', {'class':'title'}).get('href')
+                hotelUrls.append(link)
+                write_hotels_csv(file_name, city_url['city'], link)
+
+    except HTTPError as e:
+        content = e.read()
+        text = open('error.txt', 'a')
+        text.write(str(content))
+
+
 def get_hotels_url(cityUrls):
     hotelUrls = []
 
@@ -121,4 +167,4 @@ def test():
         writer.writerow(['New York', baseUrl])
 
 if __name__ == '__main__':
-    main()
+    get_washington_dc()
