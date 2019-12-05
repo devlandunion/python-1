@@ -173,7 +173,7 @@ def grabDetails(state, city, url):
     details['number_of_images'] = 0
     details['alias'] = url.split('/')[4]
     try:
-        directory = './results/images/' + details['alias'] + '/' + details['name'].replace("/", "-")
+        directory = './results/images/' + state + '/' + details['alias'] + '/' + details['name'].replace("/", "-")
         if not os.path.exists(directory):
             os.makedirs(directory)
         details['number_of_images'] = downloadImages(directory, url)
