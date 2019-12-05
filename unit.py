@@ -86,7 +86,6 @@ def getAddr(bsObject):
 
     return addr
 
-
 def getCapacities(obj):
     result = ''
     objArr = obj.find('span', text="Capacities:").find_next_sibling('ul').select('li')
@@ -143,7 +142,6 @@ def getNearbyAirports(obj):
 
     return result
 
-
 def grabDetails(state, city, url):
     html = getHtml(url)
     bsObject = BeautifulSoup(html, 'lxml')
@@ -172,13 +170,13 @@ def grabDetails(state, city, url):
     except:
         details['toll_free'] = None
 
-    try:
-        directory = './images/' + state + '/' + details['city'].replace("/", "-") + '/' + details['name'].replace("/", "-")
-        if not os.path.exists(directory):
-            os.makedirs(directory)
-        downloadImages(directory, url)
-    except:
-        print('Image not found')
+    # try:
+    #     directory = './images/' + state + '/' + details['city'].replace("/", "-") + '/' + details['name'].replace("/", "-")
+    #     if not os.path.exists(directory):
+    #         os.makedirs(directory)
+    #     downloadImages(directory, url)
+    # except:
+    #     print('Image not found')
 
     try:
         details['hotel_website'] = bsObject.find('a', {'title':'Hotel Website'}).get('href')
@@ -242,64 +240,46 @@ def grabDetails(state, city, url):
     details['cancellation_policy'] = find_nextSibling(bsObject, details['name'] + ' Cancellation Policy:')
     try:
         details['discounts_offered'] = ''
-        itemArr = bsObject.find('span', text='Discounts offered:').find_next_sibling('ul').select('li')
-        for index, discounts_item in enumerate(itemArr):
-            details['discounts_offered'] += discounts_item.text.strip()
-            if(index < len(itemArr) - 1):
-                details['discounts_offered'] += ','
+        for discounts_item in bsObject.find('span', text='Discounts offered:').find_next_sibling('ul').select('li'):
+            details['discounts_offered'] += discounts_item.text.strip() + ','
     except:
         details['discounts_offered'] = None
 
     # Room Amenities
     try:
         details['amenities'] = ''
-        itemArr = bsObject.find('p', text="Amenities are in all rooms unless noted otherwise.").find_next_sibling('div').select('li')
-        for index, amenity in enumerate(itemArr):
-            details['amenities'] += amenity.text.strip()
-            if(index < len(itemArr) - 1):
-                details['amenities'] += ','
+        for amenity in bsObject.find('p', text="Amenities are in all rooms unless noted otherwise.").find_next_sibling('div').select('li'):
+            details['amenities'] += amenity.text.strip() + ','
     except:
         details['amenities'] = None
     
     #Recreation
     try:
         details['on_site_activities'] = ''
-        itemArr = bsObject.find('li', text='On-Site Activities').find_next_siblings('li')
-        for index, activity in enumerate(itemArr):
-            details['on_site_activities'] += activity.text.strip()
-            if(index < len(itemArr) - 1):
-                details['on_site_activities'] += ','
+        for activity in bsObject.find('li', text='On-Site Activities').find_next_siblings('li'):
+            details['on_site_activities'] += activity.text.strip() + ','
     except:
         details['on_site_activities'] = None
 
     try:
         details['nearby_activities'] = ''
-        itemArr = bsObject.find('li', text='Nearby Activities').find_next_siblings('li')
-        for index, activity in enumerate(itemArr):
-            details['nearby_activities'] += activity.text.strip()
-            if(index < len(itemArr) - 1):
-                details['nearby_activities'] += ','
+        for activity in bsObject.find('li', text='Nearby Activities').find_next_siblings('li'):
+            details['nearby_activities'] += activity.text.strip() + ','
     except:
         details['nearby_activities'] = None
 
     # Services & Facilities
     try:
         details['guest_services'] = ''
-        itemArr = bsObject.find('li', text='Guest Services').find_next_siblings('li')
-        for index, activity in enumerate(itemArr):
-            details['guest_services'] += activity.text.strip()
-            if(index < len(itemArr) - 1):
-                details['guest_services'] += ','
+        for activity in bsObject.find('li', text='Guest Services').find_next_siblings('li'):
+            details['guest_services'] += activity.text.strip() + ','
     except:
         details['guest_services'] = None
 
     try:
         details['security_services'] = ''
-        itemArr = bsObject.find('li', text='Security Services').find_next_siblings('li')
-        for index, activity in enumerate(itemArr):
-            details['security_services'] += activity.text.strip()
-            if(index < len(itemArr) - 1):
-                details['security_services'] += ','
+        for activity in bsObject.find('li', text='Security Services').find_next_siblings('li'):
+            details['security_services'] += activity.text.strip() + ','
     except:
         details['security_services'] = None
 
@@ -336,11 +316,8 @@ def grabDetails(state, city, url):
                     matched = item.text.strip()
                     break
 
-            service_arr = meetings_bsObject.find('h3', text=matched).find_next_sibling('div').select('div.list li')
-            for index, service_item in enumerate(service_arr):
-                details['business_services'] += service_item.text.strip()
-                if(index < len(service_arr) - 1):
-                    details['business_services'] += ','
+            for service_item in meetings_bsObject.find('h3', text=matched).find_next_sibling('div').select('div.list li'):
+                details['business_services'] += service_item.text.strip() + ','
         except:
             details['business_services'] = None
 
@@ -373,7 +350,7 @@ def grabDetails(state, city, url):
             details['dining_options'] = None
 
         details['nearby_airports'] = getNearbyAirports(local_bsObject)
-
+ 
         scriptTags = meetings_bsObject.select('script')
         number_of_tags = len(scriptTags)
         target_tag_string = scriptTags[number_of_tags - 1].text.strip()
@@ -426,28 +403,26 @@ def grabDetails(state, city, url):
 
         details['meeting_rooms'] = None
 
-    return details
+    for key in details:
+        print(key)
+        print(details[key])
 
 
-def main(name):
-    urls = pd.read_csv("./hotel_links/" + name + '.csv')
+def getTitles():
+    url = "https://www.travelweekly.com/Hotels/Hollywood-Beach-FL/Hollywood-Beach-Marriott/Meetings-Events-p4321130"
+    html = getHtml(url)
+    bsObject = BeautifulSoup(html, "lxml")
 
-    result = []
-    for i in range(0, len(urls)):
-        try:
-            result.append(grabDetails(name, urls.City[i], urls.Link[i]))
-        except:
-            text = open('error.log', 'a')
-            text.write(urls.City[i] + ',' + urls.Link[i])
-            text.write('\n')
+    for title in bsObject.select(".title-m.text-cursive"):
+        print(title.text.strip())
+    
 
-    directory = './results/' + name
-    if not os.path.exists(directory):
-        os.makedirs(directory)
 
-    df = pd.DataFrame(result)
-    df.to_csv(directory + '/' + name + '.csv',index=False)
+def main():
+    url = "https://www.travelweekly.com/Hotels/Miami-Springs-FL/Sleep-Inn-Miami-Airport-p3632298"
+
+    grabDetails('Florida', 'Hollywood', url)
 
 
 if __name__ == '__main__':
-    main('test')
+    main()
