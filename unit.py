@@ -419,7 +419,7 @@ def getTitles():
 
 
 def main():
-    url = "https://www.travelweekly.com/Hotels/Miami-Springs-FL/Sleep-Inn-Miami-Airport-p3632298"
+    url = "https://www.travelweekly.com/Hotels/Irondale-AL/Holiday-Inn-Express-Suites-Birmingham-p51193667"
 
     grabDetails('Florida', 'Hollywood', url)
 
