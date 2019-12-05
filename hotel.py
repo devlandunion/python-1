@@ -37,20 +37,18 @@ def downloadImages(directory, url):
     imgLinks = getImgLinks(url)
 
     if(len(imgLinks)):
-        status = True
         for index, link in enumerate(imgLinks):
             try:
                 opener = urllib.request.build_opener()
                 opener.addheaders = [('User-agent', 'Mozilla/5.0')]
                 urllib.request.install_opener(opener)
                 urllib.request.urlretrieve(link, directory + '/' + str(index) + '.jpg')
-                status = True
             except:
-                status = False
+                print('image not downloadable')
 
-        return status
+        return len(imgLinks)
     else:
-        return False
+        return len(imgLinks)
 
 def find_nextSibling(bsObject, ref, tag = 'span', flag = 1):
     result = ''
@@ -172,13 +170,15 @@ def grabDetails(state, city, url):
     except:
         details['toll_free'] = None
 
+    details['number_of_images'] = 0
+    details['alias'] = url.split('/')[4]
     try:
-        directory = './images/' + state + '/' + details['city'].replace("/", "-") + '/' + details['name'].replace("/", "-")
+        directory = './results/images/' + details['alias'] + '/' + details['name'].replace("/", "-")
         if not os.path.exists(directory):
             os.makedirs(directory)
-        downloadImages(directory, url)
+        details['number_of_images'] = downloadImages(directory, url)
     except:
-        print('Image not found')
+        details['number_of_images'] = 0
 
     try:
         details['hotel_website'] = bsObject.find('a', {'title':'Hotel Website'}).get('href')
@@ -441,7 +441,7 @@ def main(name):
             text.write(urls.City[i] + ',' + urls.Link[i])
             text.write('\n')
 
-    directory = './results/' + name
+    directory = './results/csv'
     if not os.path.exists(directory):
         os.makedirs(directory)
 
@@ -450,4 +450,4 @@ def main(name):
 
 
 if __name__ == '__main__':
-    main('Colorado')
+    main('test')

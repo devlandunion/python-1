@@ -170,13 +170,14 @@ def grabDetails(state, city, url):
     except:
         details['toll_free'] = None
 
-    # try:
-    #     directory = './images/' + state + '/' + details['city'].replace("/", "-") + '/' + details['name'].replace("/", "-")
-    #     if not os.path.exists(directory):
-    #         os.makedirs(directory)
-    #     downloadImages(directory, url)
-    # except:
-    #     print('Image not found')
+    details['alias'] = url.split('/')[4]
+    try:
+        directory = './images/' + details['alias'] + '/' + details['name'].replace("/", "-")
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+        downloadImages(directory, url)
+    except:
+        print('Image not found')
 
     try:
         details['hotel_website'] = bsObject.find('a', {'title':'Hotel Website'}).get('href')
@@ -419,7 +420,7 @@ def getTitles():
 
 
 def main():
-    url = "https://www.travelweekly.com/Hotels/Irondale-AL/Holiday-Inn-Express-Suites-Birmingham-p51193667"
+    url = "https://www.travelweekly.com/Hotels/Juneau-AK/Pearsons-Pond-Luxury-Inn-Adventure-Spa-p4351435"
 
     grabDetails('Florida', 'Hollywood', url)
 
