@@ -224,6 +224,7 @@ def grabDetails(state, city, url):
     except:
         details['chain_text'] = None
         details['chain_link'] = None
+        details['chain_website'] = None
 
     # GDS Codes
     details['amadeus_gds'] = find_nextSibling(bsObject, 'Amadeus GDS:')
