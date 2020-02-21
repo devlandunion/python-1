@@ -171,6 +171,7 @@ def grabDetails(state, city, url):
         details['toll_free'] = None
 
     details['number_of_images'] = 0
+    details['state'] = state
     details['alias'] = url.split('/')[4]
     try:
         directory = './results/images/' + state + '/' + details['alias'] + '/' + details['name'].replace("/", "-")
